@@ -1,6 +1,6 @@
 include_recipe 'lxc'
 
-ruby_block 'LXC template: lxc-centos' do
+ruby_block 'LXC templates: lxc-centos and lxc-ubuntu' do
   block do
     dir = %w(/usr/share /usr/lib).map do |prefix|
       if(File.directory?(d = File.join(prefix, 'lxc/templates')))
@@ -8,15 +8,18 @@ ruby_block 'LXC template: lxc-centos' do
       end
     end.compact.first
     raise 'Failed to locate LXC template directory' unless dir
-    cfl = Chef::Resource::CookbookFile.new(
-      ::File.join(dir, 'lxc-centos'),
-      run_context
-    )
-    cfl.source 'lxc-centos'
-    cfl.mode 0755
-    cfl.cookbook cookbook_name.to_s
-    cfl.action :nothing
-    cfl.run_action(:create)
+
+    %w{ lxc-centos lxc-ubuntu }.each do |tmpl|
+      cfl = Chef::Resource::CookbookFile.new(
+                                           ::File.join(dir, tmpl),
+                                             run_context
+                                             )
+      cfl.source tmpl
+      cfl.mode 0755
+      cfl.cookbook cookbook_name.to_s
+      cfl.action :nothing
+      cfl.run_action(:create)
+    end
   end
 end
 
