@@ -46,7 +46,7 @@ mkdir -p $rootfs_path/selinux
 echo 0 > $rootfs_path/selinux/enforce
  
 # configure the network using the dhcp
-cat <<EOF > ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
+cat << "EOF" > ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
 BOOTPROTO=dhcp
 ONBOOT=yes
@@ -54,6 +54,7 @@ TYPE=Ethernet
 USERCTL=yes
 PEERDNS=yes
 IPV6INIT=no
+DHCP_HOSTNAME="$(hostname)"
 EOF
  
 # set the dns
