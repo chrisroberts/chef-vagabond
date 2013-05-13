@@ -135,6 +135,8 @@ touch ${rootfs_path}/etc/fstab
 # give us a console on /dev/console
 sed -i 's/ACTIVE_CONSOLES=.*$/ACTIVE_CONSOLES="\/dev\/console \/dev\/tty[1-4]"/' \
 ${rootfs_path}/etc/sysconfig/init
+chroot ${rootfs_path} yum -y install bash
+curl --retry 5 -L https://www.opscode.com/chef/install.sh | chroot ${rootfs_path} bash
  
 return 0
 }
@@ -155,6 +157,7 @@ echo "Downloading centos minimal ..."
 YUM="yum --installroot $INSTALL_ROOT -y --nogpgcheck"
 PKG_LIST="yum initscripts passwd rsyslog vim-minimal dhclient chkconfig"
 PKG_LIST="$PKG_LIST rootfiles policycoreutils centos-release openssh-server avahi"
+PKG_LIST="$PKG_LIST bash curl ca-certificates procps which tar openssh-clients sudo"
 MIRRORLIST_URL="http://mirrorlist.centos.org/?release=$release.$releaseminor&arch=$arch&repo=os"
  
 DOWNLOAD_OK=no
@@ -184,6 +187,8 @@ mkdir -p $INSTALL_ROOT/var/lib/rpm
 rpm --root $INSTALL_ROOT --initdb
 rpm --root $INSTALL_ROOT -ivh $INSTALL_ROOT/centos-release-$release-$releaseminor.centos.$arch.rpm
 $YUM install $PKG_LIST
+# we are doing this twice cuz it doesn't fucking install this package
+# all the time for some bizarre fucking reason
 chroot $INSTALL_ROOT rm -f /var/lib/rpm/__*
 chroot $INSTALL_ROOT rpm --rebuilddb
  
