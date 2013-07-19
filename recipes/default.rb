@@ -83,26 +83,28 @@ node[:vagabond][:customs].each do |name, options|
   end
 end
 
-solo_file = ['file_cache_path "/var/chef-host"', 'cookbook_path ["/var/chef-host/cookbooks"]'].join("\n")
+solo_file = ['file_cache_path "/var/chef-host"', 'cookbook_path ["/tmp/chef-host/cookbooks"]'].join("\n")
+final_solo_file = ['file_cache_path "/var/chef-host"', 'cookbook_path ["/var/chef-host/cookbooks"]'].join("\n")
 dna_file = "{\"run_list\":[\"recipe[vagabond::zero]\"]}"
-init_commands = [
-  "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
-  'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
-  "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
-  'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
-  'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb'
-]
 
 lxc_container node[:vagabond][:server][:zero_lxc_name] do
   action :create
   clone node[:vagabond][:server][:base]
-  fstab_mount 'cookbooks: /var/chef-host/cookbooks' do
+  fstab_mount 'cookbooks: /tmp/chef-host/cookbooks' do
     file_system node[:vagabond][:host_cookbook_store]
-    mount_point '/var/chef-host/cookbooks'
+    mount_point '/tmp/chef-host/cookbooks'
     type 'none'
     options 'bind,ro'
   end
-  initialize_commands init_commands
+  initialize_commands [
+    "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
+    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+    "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
+    'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
+    'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb',
+    "echo \"#{Base64.encode64(final_solo_file)}\" > /tmp/solo.rb.encoded",
+    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
+  ]
 end
 
 node[:vagabond][:server][:erchefs].each do |version|
@@ -112,12 +114,20 @@ node[:vagabond][:server][:erchefs].each do |version|
   lxc_container "#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}" do
     action :create
     clone node[:vagabond][:server][:base]
-    fstab_mount 'cookbooks: /var/chef-host/cookbooks' do
+    fstab_mount 'cookbooks: /tmp/chef-host/cookbooks' do
       file_system node[:vagabond][:host_cookbook_store]
-      mount_point '/var/chef-host/cookbooks'
+      mount_point '/tmp/chef-host/cookbooks'
       type 'none'
       options 'bind,ro'
     end
-    initialize_commands init_commands
+    initialize_commands [
+      "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
+      'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+      "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
+      'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
+      'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb',
+      "echo \"#{Base64.encode64(final_solo_file)}\" > /tmp/solo.rb.encoded",
+      'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
+    ]
   end
 end
