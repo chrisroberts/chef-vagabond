@@ -1,38 +1,3 @@
-
-# TODO: Move this to lxc cookbook proper at some point
-# TODO: Test this on fresh node to ensure start up scripts actuall do
-# what they are expected to
-=begin
-dpkg_autostart 'lxc' do
-  allow false
-end
-
-dpkg_autostart 'lxc-net' do
-  allow false
-end
-
-# Start at 0 and increment up if found
-unless(node[:network][:interfaces][:lxcbr0])
-  max = node.network.interfaces.map do |name, val|
-    Array(val[:routes]).map do |route|
-      if(route[:family] == 'inet' && route[:destination].start_with?('10.0'))
-        route[:destination].split('/').first.split('.')[3].to_i
-      end
-    end
-  end.compact.max
-
-  node.default[:vagabond][:lxc_network][:oct] = max ? max + 1 : 0
-  
-  # Test for existing bridge. Use different subnet if found
-  l_net = "10.0.#{node[:vagabond][:lxc_network][:oct]}"
-
-  node.set[:lxc][:addr] = "#{l_net}.1"
-  node.set[:lxc][:network] = "#{l_net}.0/24"
-  node.set[:lxc][:dhcp_range] = "#{l_net}.2,#{l_net}.199"
-  node.set[:lxc][:dhcp_max] = '199'
-end
-=end
-
 include_recipe 'apt::cacher-ng'
 include_recipe 'lxc'
 
@@ -67,8 +32,8 @@ node[:vagabond][:bases].each do |name, options|
   ]
   if(!options[:template].scan(%r{debian|ubuntu}).empty?)
     pkg_man = 'apt-get'
-    proxy = ["echo \"Acquire::http::Proxy \\\"http://#{node[:lxc][:addr]}:#{node[:apt][:cacher_port]}\\\";\" > /etc/apt/apt.conf.d/01proxy"]
-    proxy << "echo \"Acquire::https::Proxy \\\"DIRECT\\\";\" >> /etc/apt/apt.conf.d/01proxy"
+    proxy = ["echo \"Acquire::http::Proxy \\\"http://#{node[:lxc][:addr]}:#{node[:apt][:cacher_port]}\\\";\" > /etc/apt/apt.conf.d/01-vagabond-proxy"]
+    proxy << "echo \"Acquire::https::Proxy \\\"DIRECT\\\";\" >> /etc/apt/apt.conf.d/01-vagabond-proxy"
   elsif(!options[:template].scan(%r{fedora|centos}).empty?)
     pkg_man = 'yum'
   end
@@ -98,19 +63,6 @@ node[:vagabond][:bases].each do |name, options|
   end
 end
 
-=begin
-# TODO: This will be the base for building ephemeral servers
-lxc_container 'chef-server' do
-  clone 'ubuntu_1204'
-  initialize_commands [
-    
-  ]
-  only_if do
-    node[:vagabond][:server_base]
-  end
-end
-=end
-
 node[:vagabond][:customs].each do |name, options|
 
   lxc_container name do
@@ -128,5 +80,44 @@ node[:vagabond][:customs].each do |name, options|
         )
       )
     end
+  end
+end
+
+solo_file = ['file_cache_path "/var/chef-host"', 'cookbook_path ["/var/chef-host/cookbooks"]'].join("\n")
+dna_file = "{\"run_list\":[\"recipe[vagabond::zero]\"]}"
+init_commands = [
+  "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
+  'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+  "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
+  'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
+  'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb'
+]
+
+lxc_container node[:vagabond][:server][:zero_lxc_name] do
+  action :create
+  clone node[:vagabond][:server][:base]
+  fstab_mount 'cookbooks: /var/chef-host/cookbooks' do
+    file_system node[:vagabond][:host_cookbook_store]
+    mount_point '/var/chef-host/cookbooks'
+    type 'none'
+    options 'bind,ro'
+  end
+  initialize_commands init_commands
+end
+
+node[:vagabond][:server][:erchefs].each do |version|
+
+  dna_file = "{\"chef-server\": {\"version\":\"#{version}\"},\"run_list\":[\"recipe[chef-server]\"]}"
+  
+  lxc_container "#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}" do
+    action :create
+    clone node[:vagabond][:server][:base]
+    fstab_mount 'cookbooks: /var/chef-host/cookbooks' do
+      file_system node[:vagabond][:host_cookbook_store]
+      mount_point '/var/chef-host/cookbooks'
+      type 'none'
+      options 'bind,ro'
+    end
+    initialize_commands init_commands
   end
 end
