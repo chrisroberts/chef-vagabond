@@ -130,4 +130,10 @@ node[:vagabond][:server][:erchefs].each do |version|
       'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
     ]
   end
+
+  lxc = ::Lxc.new("#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}")
+  
+  file lxc.rootfs.join('etc/init/chef-server-runsvdir.conf') do
+    action :delete
+  end
 end
