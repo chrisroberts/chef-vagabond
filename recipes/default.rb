@@ -142,7 +142,7 @@ node[:vagabond][:server][:erchefs].each do |version|
         FileUtils.rm lxc.rootfs.join('etc/init/chef-server-runsvdir.conf')
       end
       # Remove nginx ca files that will be stale
-      File.glob(lxc.rootfs.join('var/opt/chef-server/nginx/ca/*').to_path).each do |path|
+      Dir.glob(lxc.rootfs.join('var/opt/chef-server/nginx/ca/*').to_path).each do |path|
         FileUtils.rm path
       end
     end
