@@ -138,7 +138,9 @@ node[:vagabond][:server][:erchefs].each do |version|
     block do
       lxc = ::Lxc.new("#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}")
       # Prevent server startup on initial provision
-      FileUtils.rm lxc.rootfs.join('etc/init/chef-server-runsvdir.conf')
+      if(File.exists?(lxc.rootfs.join('etc/init/chef-server-runsvdir.conf')))
+        FileUtils.rm lxc.rootfs.join('etc/init/chef-server-runsvdir.conf')
+      end
       # Remove nginx ca files that will be stale
       File.glob(lxc.rootfs.join('var/opt/chef-server/nginx/ca/*').to_path).each do |path|
         FileUtils.rm path
