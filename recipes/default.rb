@@ -103,7 +103,10 @@ lxc_container node[:vagabond][:server][:zero_lxc_name] do
     'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
     'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb',
     "echo \"#{Base64.encode64(final_solo_file)}\" > /tmp/solo.rb.encoded",
-    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
+    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+    'cp -R /etc/ssl/private/ /etc/ssl/private.bak',
+    'rm -rf /etc/ssl/private',
+    'mv /etc/ssl/private.bak /etc/ssl/private' # NOTE: i have nfc what this is about
   ]
 end
 
@@ -131,9 +134,16 @@ node[:vagabond][:server][:erchefs].each do |version|
     ]
   end
 
-  lxc = ::Lxc.new("#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}")
-  
-  file lxc.rootfs.join('etc/init/chef-server-runsvdir.conf') do
-    action :delete
+  ruby_block "Clean server base (version: #{version})" do
+    block do
+      lxc = ::Lxc.new("#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}")
+      # Prevent server startup on initial provision
+      FileUtils.rm lxc.rootfs.join('etc/init/chef-server-runsvdir.conf')
+      # Remove nginx ca files that will be stale
+      File.glob(lxc.rootfs.join('var/opt/chef-server/nginx/ca/*').to_path).each do |path|
+        FileUtils.rm path
+      end
+    end
   end
+
 end
