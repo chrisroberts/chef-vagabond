@@ -19,7 +19,7 @@ default[:vagabond][:bases][:debian_6][:create_environment] = {'SUITE' => 'squeez
 default[:vagabond][:bases][:debian_7][:template] = 'debian'
 default[:vagabond][:bases][:debian_7][:create_environment] = {'SUITE' => 'wheezy'}
 default[:vagabond][:customs] = {}
-default[:vagabond][:server][:erchefs] = ['11.0.8'] # versions
+default[:vagabond][:server][:erchefs] = [] #['11.0.8'] # versions
 default[:vagabond][:server][:base] = 'ubuntu_1204'
 default[:vagabond][:server][:prefix] = 'vb-server-'
 default[:vagabond][:server][:zero_lxc_name] = 'vb-zero-server'
