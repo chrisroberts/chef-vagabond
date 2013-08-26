@@ -68,8 +68,18 @@ node[:vagabond][:customs].each do |name, options|
   lxc_container name do
     action :create
     clone options[:base]
+    if(options[:configuration])
+      options[:configuration].each_pair do |subresource, attributes|
+        self.send(subresource, 'vagabond dynamic') do
+          attributes.each_pair do |key, value|
+            self.send(key, value)
+          end
+        end
+      end
+    end
   end
-  
+
+  # NOTE: This is deprecated
   if(options[:memory])
     lxc_config name do
       cgroup(
