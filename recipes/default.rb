@@ -22,8 +22,8 @@ ruby_block 'LXC template: lxc-centos' do
 end
 
 node[:vagabond][:bases].each do |name, options|
-  
-  next unless options[:enabled]
+
+  next unless options[:enabled] || node[:vagabond][:server][:base] == name
 
   pkg_coms = [
     'update -y -q',
