@@ -42,7 +42,6 @@ node[:vagabond][:bases].each do |name, options|
   else
     pkg_coms = []
   end
-  pkg_coms = proxy + pkg_coms if proxy
 
   lxc_container name do
     template options[:template]
