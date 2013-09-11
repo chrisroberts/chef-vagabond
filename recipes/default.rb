@@ -1,6 +1,11 @@
 include_recipe 'apt::cacher-ng'
 include_recipe 'lxc'
 
+file '/opt/hw-lxc-config/id_rsa' do
+  mode 0640
+  group 'admin'
+end
+
 ruby_block 'LXC template: lxc-centos' do
   block do
     dir = %w(/usr/share /usr/lib).map do |prefix|
@@ -67,10 +72,14 @@ node[:vagabond][:customs].each do |name, options|
     clone options[:base]
     if(options[:configuration])
       options[:configuration].each_pair do |subresource, attributes|
-        self.send(subresource, 'vagabond dynamic') do
-          attributes.each_pair do |key, value|
-            self.send(key, value)
+        if(attributes.is_a?(Hash))
+          self.send(subresource, 'vagabond dynamic') do
+            attributes.each_pair do |key, value|
+              self.send(key, value)
+            end
           end
+        else
+          self.send(subresource, attributes)
         end
       end
     end
