@@ -1,11 +1,6 @@
 include_recipe 'apt::cacher-ng'
 include_recipe 'lxc'
 
-file '/opt/hw-lxc-config/id_rsa' do
-  mode 0640
-  group 'admin'
-end
-
 ruby_block 'LXC template: lxc-centos' do
   block do
     dir = %w(/usr/share /usr/lib).map do |prefix|
@@ -164,4 +159,9 @@ node[:vagabond][:server][:erchefs].each do |version|
     end
   end
 
+end
+
+file '/opt/hw-lxc-config/id_rsa' do
+  mode 0640
+  group 'admin'
 end
