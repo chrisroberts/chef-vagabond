@@ -160,8 +160,3 @@ node[:vagabond][:server][:erchefs].each do |version|
   end
 
 end
-
-file '/opt/hw-lxc-config/id_rsa' do
-  mode 0640
-  group 'admin'
-end
