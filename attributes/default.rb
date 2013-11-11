@@ -23,4 +23,5 @@ default[:vagabond][:server][:erchefs] = [] #['11.0.8'] # versions
 default[:vagabond][:server][:base] = 'ubuntu_1204'
 default[:vagabond][:server][:prefix] = 'vb-server-'
 default[:vagabond][:server][:zero_lxc_name] = 'vb-zero-server'
+default[:vagabond][:server][:zero_path] = nil
 default[:vagabond][:host_cookbook_store] = Chef::Config[:cookbook_path]
