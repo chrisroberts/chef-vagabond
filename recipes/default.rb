@@ -160,3 +160,7 @@ node[:vagabond][:server][:erchefs].each do |version|
   end
 
 end
+
+directory node[:lxc][:container_directory] do
+  mode 0755
+end
