@@ -119,6 +119,9 @@ lxc_container node[:vagabond][:server][:zero_lxc_name] do
     'rm -rf /etc/ssl/private',
     'mv /etc/ssl/private.bak /etc/ssl/private' # NOTE: i have nfc what this is about
   ]
+  not_if do
+    node[:vagabond][:disable_default_zero]
+  end
 end
 
 node[:vagabond][:server][:erchefs].each do |version|
