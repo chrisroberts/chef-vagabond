@@ -48,7 +48,7 @@ node[:vagabond][:bases].each do |name, options|
     template_opts options[:template_options]
     default_config false if options[:memory]
     create_environment options[:environment] if options[:environment]
-    initialize_commands [].tap do |coms|
+    initialize_commands [].tap{ |coms|
       if(node.platform_family?(:debian))
         coms += [
           'locale-gen en_US.UTF-8',
@@ -61,7 +61,7 @@ node[:vagabond][:bases].each do |name, options|
       coms += pkg_coms + [
         'curl -L https://www.opscode.com/chef/install.sh | bash'
       ]
-    end
+    }
   end
 end
 
