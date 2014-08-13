@@ -4,6 +4,10 @@ default[:vagabond][:bases][:ubuntu_1204][:template] = 'ubuntu'
 default[:vagabond][:bases][:ubuntu_1204][:template_options] = {'--release' => 'precise'}
 default[:vagabond][:bases][:ubuntu_1210][:template] = 'ubuntu'
 default[:vagabond][:bases][:ubuntu_1210][:template_options] = {'--release' => 'quantal'}
+default[:vagabond][:bases][:ubuntu_1310][:template] = 'ubuntu'
+default[:vagabond][:bases][:ubuntu_1310][:template_options] = {'--release' => 'saucy'}
+default[:vagabond][:bases][:ubuntu_1404][:template] = 'ubuntu'
+default[:vagabond][:bases][:ubuntu_1404][:template_options] = {'--release' => 'trusty'}
 default[:vagabond][:bases][:centos_58][:template] = 'centos'
 default[:vagabond][:bases][:centos_58][:template_options] = {'--release' => '5', '--releaseminor' => '8'}
 default[:vagabond][:bases][:centos_63][:template] = 'centos'
