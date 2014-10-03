@@ -43,25 +43,26 @@ node[:vagabond][:bases].each do |name, options|
     pkg_coms = []
   end
 
+  init_commands = []
+  if(!options[:template].scan(%r{debian|ubuntu}).empty?)
+    init_commands += [
+      'locale-gen en_US.UTF-8',
+      'update-locale LANG="en_US.UTF-8"',
+      'rm -f /etc/sysctl.d/10-console-messages.conf',
+      'rm -f /etc/sysctl.d/10-ptrace.conf',
+      'rm -f /etc/sysctl.d/10-kernel-hardening.conf'
+    ]
+  end
+  init_commands += pkg_coms + [
+    'curl -L https://www.opscode.com/chef/install.sh | bash'
+  ]
+
   lxc_container name do
     template options[:template]
     template_opts options[:template_options]
     default_config false if options[:memory]
     create_environment options[:environment] if options[:environment]
-    initialize_commands [].tap{ |coms|
-      if(node.platform_family?(:debian))
-        coms += [
-          'locale-gen en_US.UTF-8',
-          'update-locale LANG="en_US.UTF-8"',
-          'rm -f /etc/sysctl.d/10-console-messages.conf',
-          'rm -f /etc/sysctl.d/10-ptrace.conf',
-          'rm -f /etc/sysctl.d/10-kernel-hardening.conf'
-        ]
-      end
-      coms += pkg_coms + [
-        'curl -L https://www.opscode.com/chef/install.sh | bash'
-      ]
-    }
+    initialize_commands init_commands
   end
 end
 

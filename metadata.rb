@@ -1,10 +1,8 @@
 name 'vagabond'
-version '1.0.5'
+version '1.1.0'
 license 'Apache 2.0'
 maintainer 'Chris Roberts'
-maintainer_email 'chrisroberts.code@gmail.com'
+maintainer_email 'chris@hw-ops.com'
 
-supports 'ubuntu'
-
-depends 'lxc', '~> 1.1.0'
+depends 'lxc', '~> 2.0.0'
 depends 'apt', '>= 2.0.0'

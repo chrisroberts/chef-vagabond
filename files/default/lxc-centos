@@ -1,50 +1,50 @@
 #!/bin/bash
- 
+
 #
 # template script for generating CentOS container for LXC
 #
- 
+
 #
 # lxc: linux Container library
- 
+
 # Authors:
 # Daniel Lezcano <daniel.lezcano@free.fr>
 # Ramez Hanna <rhanna@informatiq.org>
- 
+
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
- 
+
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
- 
+
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- 
+
 #Configurations
 arch=$(arch)
 cache_base=/var/cache/lxc/centos/$arch
 default_path=/var/lib/lxc
 root_password=password
- 
+
 # is this centos?
 [ -f /etc/redhat-release ] && is_centos=true
- 
+
 if [ "$arch" = "i686" ]; then
 arch=i386
 fi
- 
+
 configure_centos()
 {
- 
+
 # disable selinux in centos
 mkdir -p $rootfs_path/selinux
 echo 0 > $rootfs_path/selinux/enforce
- 
+
 # configure the network using the dhcp
 cat <<EOF > ${rootfs_path}/etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
@@ -55,7 +55,7 @@ USERCTL=yes
 PEERDNS=yes
 IPV6INIT=no
 EOF
- 
+
 # set the dns
 # TODO: Probably remove this
 cat > $rootfs_path/etc/resolv.conf << END
@@ -63,37 +63,37 @@ cat > $rootfs_path/etc/resolv.conf << END
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 END
- 
- 
+
+
 # set the hostname
 cat <<EOF > ${rootfs_path}/etc/sysconfig/network
 NETWORKING=yes
 HOSTNAME=${name}
 EOF
- 
+
 # set minimal hosts
 cat <<EOF > $rootfs_path/etc/hosts
 127.0.0.1 localhost $name
 ::1 localhost localhost.localdomain localhost6 localhost6.localdomain6
 EOF
- 
+
 sed -i 's|.sbin.start_udev||' ${rootfs_path}/etc/rc.sysinit
 sed -i 's|.sbin.start_udev||' ${rootfs_path}/etc/rc.d/rc.sysinit
 # don't mount devpts, for pete's sake
 sed -i 's/^.*dev.pts.*$/#\0/' ${rootfs_path}/etc/rc.sysinit
 sed -i 's/^.*dev.pts.*$/#\0/' ${rootfs_path}/etc/rc.d/rc.sysinit
- 
+
 sed -i 's/^.*dev.pts.*$/#\0/' ${rootfs_path}/etc/rc.d/rc.sysinit
 sed -i 's/^.*dev.pts.*$/#\0/' ${rootfs_path}/etc/rc.d/rc.sysinit
 sed -i 's/^.*dev.pts.*$/#\0/' ${rootfs_path}/etc/rc.d/rc.sysinit
- 
+
 sed -i 's/^#baseurl/baseurl/g' ${rootfs_path}/etc/yum.repos.d/CentOS-Base.repo
-sed -i "s/\$releasever/$release.$releaseminor/g" ${rootfs_path}/etc/yum.repos.d/CentOS-Base.repo
+sed -i "s/\$releasever/$release/g" ${rootfs_path}/etc/yum.repos.d/CentOS-Base.repo
 sed -i '115,126s/^/#/' ${rootfs_path}/etc/rc.d/init.d/halt
- 
+
 chroot ${rootfs_path} chkconfig udev-post off
 chroot ${rootfs_path} chkconfig network on
- 
+
 dev_path="${rootfs_path}/dev"
 rm -rf $dev_path
 mkdir -p $dev_path
@@ -113,10 +113,10 @@ mknod -m 600 ${dev_path}/console c 5 1
 mknod -m 666 ${dev_path}/full c 1 7
 mknod -m 600 ${dev_path}/initctl p
 mknod -m 666 ${dev_path}/ptmx c 5 2
- 
+
 echo "setting root passwd to $root_password"
 echo "root:$root_password" | chroot $rootfs_path chpasswd
- 
+
 # specifying this in the initial packages doesn't always work.
 # echo "installing centos-release package"
 # if [ ! -f ${rootfs_path}/etc/resolv.conf ]; then
@@ -128,20 +128,20 @@ echo "root:$root_password" | chroot $rootfs_path chpasswd
 # if [ ! -z $remove_resolv ]; then
 # rm ${rootfs_path}/etc/resolv.conf
 # fi
- 
+
 # silence some needless startup errors
 touch ${rootfs_path}/etc/fstab
- 
+
 # give us a console on /dev/console
 sed -i 's/ACTIVE_CONSOLES=.*$/ACTIVE_CONSOLES="\/dev\/console \/dev\/tty[1-4]"/' \
 ${rootfs_path}/etc/sysconfig/init
- 
+
 return 0
 }
- 
+
 download_centos()
 {
- 
+
 # check the mini centos was not already downloaded
 INSTALL_ROOT=$cache/partial
 mkdir -p $INSTALL_ROOT
@@ -149,16 +149,16 @@ if [ $? -ne 0 ]; then
 echo "Failed to create '$INSTALL_ROOT' directory"
 return 1
 fi
- 
+
 # download a mini centos into a cache
 echo "Downloading centos minimal ..."
 YUM="yum --installroot $INSTALL_ROOT -y --nogpgcheck"
 PKG_LIST="yum initscripts passwd rsyslog vim-minimal dhclient chkconfig"
 PKG_LIST="$PKG_LIST rootfiles policycoreutils centos-release openssh-server avahi"
-MIRRORLIST_URL="http://mirrorlist.centos.org/?release=$release.$releaseminor&arch=$arch&repo=os"
+MIRRORLIST_URL="http://mirrorlist.centos.org/?release=$release&arch=$arch&repo=os"
 
 FOUND_MIRRORS=$(curl -s -S -f "$MIRRORLIST_URL")
-AVAIL_MIRRORS="${FOUND_MIRRORS} http://vault.centos.org/$release.$releaseminor/os/$arch"
+AVAIL_MIRRORS="${FOUND_MIRRORS} http://vault.centos.org/$release/os/$arch"
 
 DOWNLOAD_OK=no
 for MIRROR_URL in $AVAIL_MIRRORS; do
@@ -167,14 +167,14 @@ echo "Failed to get a mirror"
 continue
 fi
 if [ $release = "6" ]; then
-PACKAGE_NAME=`wget -q -O - ${MIRROR_URL}/Packages/ | grep centos-release-${release}.${releaseminor} | sed -r 's/.+rpm">//g' | sed -r 's/<.+//g'`
+PACKAGE_NAME=`wget -q -O - ${MIRROR_URL}/Packages/ | grep centos-release-${release} | sed -r 's/.+rpm">//g' | sed -r 's/<.+//g'`
 RELEASE_URL="$MIRROR_URL/Packages/${PACKAGE_NAME}"
 else
-PACKAGE_NAME=`wget -q -O - ${MIRROR_URL}/CentOS/ | grep centos-release-${release}.${releaseminor} | sed -r 's/.+rpm">//g' | sed -r 's/<.+//g'`
+PACKAGE_NAME=`wget -q -O - ${MIRROR_URL}/CentOS/ | grep centos-release-${release} | sed -r 's/.+rpm">//g' | sed -r 's/<.+//g'`
 RELEASE_URL="$MIRROR_URL/CentOS/${PACKAGE_NAME}"
 fi
 echo "Fetching from $RELEASE_URL"
-curl -f "$RELEASE_URL" > $INSTALL_ROOT/centos-release-$release-$releaseminor.centos.$arch.rpm
+curl -f "$RELEASE_URL" > $INSTALL_ROOT/centos-release-$release.centos.$arch.rpm
 if [ $? -ne 0 ]; then
 echo "Failed to download centos release rpm"
 continue
@@ -186,28 +186,28 @@ if [ $DOWNLOAD_OK != yes ]; then
 echo "Aborting"
 return 1
 fi
- 
+
 mkdir -p $INSTALL_ROOT/var/lib/rpm
 rpm --root $INSTALL_ROOT --initdb
-rpm --root $INSTALL_ROOT -ivh $INSTALL_ROOT/centos-release-$release-$releaseminor.centos.$arch.rpm
+rpm --root $INSTALL_ROOT -ivh $INSTALL_ROOT/centos-release-$release.centos.$arch.rpm
 $YUM install $PKG_LIST
 chroot $INSTALL_ROOT rm -f /var/lib/rpm/__*
 chroot $INSTALL_ROOT rpm --rebuilddb
- 
+
 if [ $? -ne 0 ]; then
 echo "Failed to download the rootfs, aborting."
 return 1
 fi
- 
+
 mv "$INSTALL_ROOT" "$cache/rootfs"
 echo "Download complete."
- 
+
 return 0
 }
- 
+
 copy_centos()
 {
- 
+
 # make a local copy of the minicentos
 echo -n "Copying rootfs to $rootfs_path ..."
 #cp -a $cache/rootfs-$arch $rootfs_path || return 1
@@ -216,13 +216,13 @@ mkdir -p $rootfs_path
 rsync -a $cache/rootfs/ $rootfs_path/
 return 0
 }
- 
+
 update_centos()
 {
 # chroot $cache/rootfs yum -y update
 echo "Updates disabled"
 }
- 
+
 install_centos()
 {
 mkdir -p /var/lock/subsys/
@@ -232,7 +232,7 @@ if [ $? -ne 0 ]; then
 echo "Cache repository is busy."
 return 1
 fi
- 
+
 echo "Checking cache download in $cache/rootfs ... "
 if [ ! -e "$cache/rootfs" ]; then
 download_centos
@@ -249,24 +249,24 @@ else
 echo "Update finished"
 fi
 fi
- 
+
 echo "Copy $cache/rootfs to $rootfs_path ... "
 copy_centos
 if [ $? -ne 0 ]; then
 echo "Failed to copy rootfs"
 return 1
 fi
- 
+
 return 0
- 
+
 ) 200>/var/lock/subsys/lxc
- 
+
 return $?
 }
- 
+
 copy_configuration()
 {
- 
+
 mkdir -p $config_path
 cat <<EOF >> $config_path/config
 lxc.utsname = $name
@@ -274,10 +274,10 @@ lxc.tty = 4
 lxc.pts = 1024
 lxc.rootfs = $rootfs_path
 lxc.mount = $config_path/fstab
- 
+
 # uncomment the next line to run the container unconfined:
 #lxc.aa_profile = unconfined
- 
+
 #cgroups
 lxc.cgroup.devices.deny = a
 # /dev/null and zero
@@ -296,7 +296,7 @@ lxc.cgroup.devices.allow = c 5:2 rwm
 # rtc
 lxc.cgroup.devices.allow = c 254:0 rwm
 EOF
- 
+
 cat <<EOF > $config_path/fstab
 proc proc proc nodev,noexec,nosuid 0 0
 sysfs sys sysfs defaults 0 0
@@ -305,17 +305,17 @@ if [ $? -ne 0 ]; then
 echo "Failed to add configuration"
 return 1
 fi
- 
+
 return 0
 }
- 
+
 clean()
 {
- 
+
 if [ ! -e $cache ]; then
 exit 0
 fi
- 
+
 # lock, so we won't purge while someone is creating a repository
 (
 flock -x 200
@@ -323,14 +323,14 @@ if [ $? != 0 ]; then
 echo "Cache repository is busy."
 exit 1
 fi
- 
+
 echo -n "Purging the download cache for Centos-$release-$releaseminor..."
 rm --preserve-root --one-file-system -rf $cache && echo "Done." || exit 1
 exit 0
- 
+
 ) 200>/var/lock/subsys/lxc
 }
- 
+
 usage()
 {
 cat <<EOF
@@ -350,14 +350,14 @@ Optional args:
 EOF
 return 0
 }
- 
+
 options=$(getopt -o hp:n:cR:m: -l help,path:,name:,clean,release:,releaseminor: -- "$@")
 if [ $? -ne 0 ]; then
 usage $(basename $0)
 exit 1
 fi
 eval set -- "$options"
- 
+
 while true
 do
 case "$1" in
@@ -371,33 +371,33 @@ case "$1" in
 *) break ;;
 esac
 done
- 
+
 if [ ! -z "$clean" -a -z "$path" ]; then
 clean || exit 1
 exit 0
 fi
- 
+
 needed_pkgs=""
 type yum >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 needed_pkgs="yum $needed_pkgs"
 fi
- 
+
 type curl >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 needed_pkgs="curl $needed_pkgs"
 fi
- 
+
 if [ -n "$needed_pkgs" ]; then
 echo "Missing commands: $needed_pkgs"
 echo "Please install these using \"sudo apt-get install $needed_pkgs\""
 exit 1
 fi
- 
+
 if [ -z "$path" ]; then
 path=$default_path
 fi
- 
+
 if [ -z "$release" ]; then
 if [ "$is_centos" ]; then
 release=$(cat /etc/centos-release |awk '/^Fedora/ {print $3}')
@@ -406,21 +406,21 @@ echo "This is not a centos host and release missing, defaulting to 6.3. use -R|-
 release=6
 fi
 fi
- 
+
 if [ -z "$releaseminor" ]; then
 releaseminor=3
 fi
- 
+
 if [ "$(id -u)" != "0" ]; then
 echo "This script should be run as 'root'"
 exit 1
 fi
- 
- 
+
+
 rootfs_path=$path/rootfs
 config_path=$default_path/$name
-cache=$cache_base/$release.$releaseminor
- 
+cache=$cache_base/$release
+
 revert()
 {
 echo "Interrupted, so cleaning up"
@@ -431,28 +431,28 @@ rm -rf $default_path/$name
 echo "exiting..."
 exit 1
 }
- 
+
 trap revert SIGHUP SIGINT SIGTERM
- 
+
 copy_configuration
 if [ $? -ne 0 ]; then
 echo "failed write configuration file"
 exit 1
 fi
- 
+
 install_centos
 if [ $? -ne 0 ]; then
 echo "failed to install centos"
 exit 1
 fi
- 
+
 configure_centos
 if [ $? -ne 0 ]; then
 echo "failed to configure centos for a container"
 exit 1
 fi
- 
- 
+
+
 if [ ! -z $clean ]; then
 clean || exit 1
 exit 0
