@@ -1,5 +1,5 @@
 name 'vagabond'
-version '1.1.2'
+version '1.1.3'
 license 'Apache 2.0'
 maintainer 'Chris Roberts'
 maintainer_email 'chris@hw-ops.com'
