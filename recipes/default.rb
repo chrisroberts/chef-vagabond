@@ -173,3 +173,20 @@ end
 directory node[:lxc][:container_directory] do
   mode 0755
 end
+
+node[:vagabond][:container_key][:users].each do |key_user|
+
+  directory File.join('/home', key_user, '.ssh') do
+    recursive true
+    owner key_user
+  end
+
+  file File.join('/home', key_user, '.ssh', node[:vagabond][:container_key][:name]) do
+    content lazy{
+      File.read('/opt/hw-lxc-config/id_rsa')
+    }
+    mode 0600
+    owner key_user
+  end
+
+end
