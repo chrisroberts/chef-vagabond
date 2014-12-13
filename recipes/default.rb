@@ -56,6 +56,12 @@ node[:vagabond][:bases].each do |name, options|
   init_commands += pkg_coms + [
     'curl -L https://www.opscode.com/chef/install.sh | bash'
   ]
+  if(!options[:template].scan(%r{debian|ubuntu}).empty?)
+    init_commands += [
+      'apt-get install lxc --no-install-recommends',
+      '/opt/chef/embedded/bin/gem install --no-ri --no-rdoc attribute_struct'
+    ]
+  end
 
   lxc_container name do
     template options[:template]
