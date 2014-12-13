@@ -54,7 +54,7 @@ node[:vagabond][:bases].each do |name, options|
     ]
   end
   init_commands += pkg_coms + [
-    'curl -L https://www.opscode.com/chef/install.sh | bash'
+    "curl -L https://www.opscode.com/chef/install.sh | bash -s -- -v #{node[:vagabond][:chef_version]}"
   ]
   if(!options[:template].scan(%r{debian|ubuntu}).empty?)
     init_commands += [

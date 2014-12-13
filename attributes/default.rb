@@ -32,3 +32,4 @@ default[:vagabond][:host_cookbook_store] = Chef::Config[:cookbook_path]
 
 default[:vagabond][:container_key][:name] = 'lxc_container_rsa'
 default[:vagabond][:container_key][:users] = []
+default[:vagabond][:chef_version] = '11.16.2'
