@@ -58,7 +58,8 @@ node[:vagabond][:bases].each do |name, options|
   ]
   if(!options[:template].scan(%r{debian|ubuntu}).empty?)
     init_commands += [
-      'apt-get install lxc --no-install-recommends -y -q',
+      'echo "USE_LXC_BRIDGE=false" > /etc/default/lxc',
+      'apt-get install lxc --no-install-recommends -y -q --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew"',
       '/opt/chef/embedded/bin/gem install --no-ri --no-rdoc attribute_struct'
     ]
   end
