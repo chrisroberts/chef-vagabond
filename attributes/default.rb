@@ -28,7 +28,7 @@ default[:vagabond][:server][:base] = 'ubuntu_1204'
 default[:vagabond][:server][:prefix] = 'vb-server-'
 default[:vagabond][:server][:zero_lxc_name] = 'vb-zero-server'
 default[:vagabond][:server][:zero_path] = nil
-default[:vagabond][:host_cookbook_store] = Chef::Config[:cookbook_path]
+default[:vagabond][:host_cookbook_store] = [Chef::Config[:cookbook_path]].flatten.compact.first
 
 default[:vagabond][:container_key][:name] = 'lxc_container_rsa'
 default[:vagabond][:container_key][:users] = []
