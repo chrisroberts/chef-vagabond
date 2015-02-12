@@ -71,6 +71,10 @@ node[:vagabond][:bases].each do |name, options|
     create_environment options[:environment] if options[:environment]
     initialize_commands init_commands
   end
+
+  lxc_service name do
+    action :stop
+  end
 end
 
 node[:vagabond][:customs].each do |name, options|
@@ -91,6 +95,10 @@ node[:vagabond][:customs].each do |name, options|
         end
       end
     end
+  end
+
+  lxc_service name do
+    action :stop
   end
 
   # NOTE: This is deprecated
@@ -152,12 +160,12 @@ node[:vagabond][:server][:erchefs].each do |version|
     end
     initialize_commands [
       "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
-      'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+      'base64 -i --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
       "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
-      'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
+      'base64 -i --decode /tmp/dna.json.encoded > /tmp/dna.json',
       'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb',
       "echo \"#{Base64.encode64(final_solo_file)}\" > /tmp/solo.rb.encoded",
-      'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
+      'base64 -i --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb'
     ]
   end
 
@@ -173,6 +181,11 @@ node[:vagabond][:server][:erchefs].each do |version|
         FileUtils.rm path
       end
     end
+  end
+
+  # Ensure containers are stopped
+  lxc_service "#{node[:vagabond][:server][:prefix]}#{version.gsub('.', '_')}" do
+    action :stop
   end
 
 end
