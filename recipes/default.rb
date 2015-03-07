@@ -211,7 +211,7 @@ node[:vagabond][:container_key][:users].each do |key_user|
     mode 0600
     owner key_user
     if(node[:vagabond][:container_key][:subscribe])
-      subscribes :create, "user[#{key_user}]", :immediately
+      subscribes :create, "user[#{key_user}]", :delayed
     end
   end
 
