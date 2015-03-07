@@ -199,6 +199,9 @@ node[:vagabond][:container_key][:users].each do |key_user|
   directory File.join('/home', key_user, '.ssh') do
     recursive true
     owner key_user
+    if(node[:vagabond][:container_key][:subscribe])
+      subscribes :create, "user[#{key_user}]", :immediately
+    end
   end
 
   file File.join('/home', key_user, '.ssh', node[:vagabond][:container_key][:name]) do
@@ -207,6 +210,9 @@ node[:vagabond][:container_key][:users].each do |key_user|
     }
     mode 0600
     owner key_user
+    if(node[:vagabond][:container_key][:subscribe])
+      subscribes :create, "user[#{key_user}]", :immediately
+    end
   end
 
 end
