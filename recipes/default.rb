@@ -75,6 +75,10 @@ node[:vagabond][:bases].each do |name, options|
   lxc_service name do
     action :stop
   end
+
+  directory ::File.join('/var/lib/lxc', name) do
+    mode 0755
+  end
 end
 
 node[:vagabond][:customs].each do |name, options|
