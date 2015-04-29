@@ -196,12 +196,21 @@ end
 
 node[:vagabond][:container_key][:users].each do |key_user|
 
-  directory File.join('/home', key_user, '.ssh') do
+  directory "vagabond_ssh_dir[#{key_user}]" do
+    path lazy{
+      File.join(Etc.getpwnam(key_user).dir, '.ssh')
+    }
     recursive true
     owner key_user
   end
 
-  file File.join('/home', key_user, '.ssh', node[:vagabond][:container_key][:name]) do
+  file "vagabond_ssh_key[#{key_user}]" do
+    path lazy{
+      File.join(
+        Etc.getpwnam(key_user).dir, '.ssh',
+        node[:vagabond][:container_key][:name]
+      )
+    }
     content lazy{
       File.read('/opt/hw-lxc-config/id_rsa')
     }
