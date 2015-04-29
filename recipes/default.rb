@@ -130,12 +130,12 @@ lxc_container node[:vagabond][:server][:zero_lxc_name] do
   end
   initialize_commands [
     "echo \"#{Base64.encode64(solo_file)}\" > /tmp/solo.rb.encoded",
-    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+    'base64 -i --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
     "echo \"#{Base64.encode64(dna_file)}\" > /tmp/dna.json.encoded",
-    'base64 --decode /tmp/dna.json.encoded > /tmp/dna.json',
+    'base64 -i --decode /tmp/dna.json.encoded > /tmp/dna.json',
     'chef-solo -j /tmp/dna.json -c /etc/chef-solo-host.rb',
     "echo \"#{Base64.encode64(final_solo_file)}\" > /tmp/solo.rb.encoded",
-    'base64 --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
+    'base64 -i --decode /tmp/solo.rb.encoded > /etc/chef-solo-host.rb',
     'cp -R /etc/ssl/private/ /etc/ssl/private.bak',
     'rm -rf /etc/ssl/private',
     'mv /etc/ssl/private.bak /etc/ssl/private' # NOTE: i have nfc what this is about
