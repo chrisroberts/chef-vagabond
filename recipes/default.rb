@@ -17,7 +17,7 @@ ruby_block 'LXC template: lxc-centos' do
     cfl.mode 0755
     cfl.cookbook cookbook_name.to_s
     cfl.action :nothing
-    cfl.run_action(:create)
+    cfl.run_action(:create) if node[:vagabond][:centos_template_fix]
   end
 end
 

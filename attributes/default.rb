@@ -14,7 +14,7 @@ default[:vagabond][:bases][:centos_5][:template] = 'centos'
 default[:vagabond][:bases][:centos_5][:template_options] = {'--release' => '5'}
 default[:vagabond][:bases][:centos_5][:enabled] = false
 default[:vagabond][:bases][:centos_6][:template] = 'centos'
-default[:vagabond][:bases][:centos_6][:template_options] = {'--release' => '6', '--releaseminor' => '4'}
+default[:vagabond][:bases][:centos_6][:template_options] = {'--release' => '6'}
 default[:vagabond][:bases][:centos_6][:enabled] = false
 default[:vagabond][:bases][:debian_6][:template] = 'debian'
 default[:vagabond][:bases][:debian_6][:create_environment] = {'SUITE' => 'squeeze'}
