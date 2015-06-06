@@ -16,12 +16,18 @@ default[:vagabond][:bases][:centos_5][:enabled] = false
 default[:vagabond][:bases][:centos_6][:template] = 'centos'
 default[:vagabond][:bases][:centos_6][:template_options] = {'--release' => '6'}
 default[:vagabond][:bases][:centos_6][:enabled] = false
+default[:vagabond][:bases][:centos_7][:template] = 'centos'
+default[:vagabond][:bases][:centos_7][:template_options] = {'--release' => '7'}
+default[:vagabond][:bases][:centos_7][:enabled] = false
 default[:vagabond][:bases][:debian_6][:template] = 'debian'
-default[:vagabond][:bases][:debian_6][:create_environment] = {'SUITE' => 'squeeze'}
+default[:vagabond][:bases][:debian_6][:template_options] = {'--release' => 'squeeze'}
 default[:vagabond][:bases][:debian_6][:enabled] = false
 default[:vagabond][:bases][:debian_7][:template] = 'debian'
-default[:vagabond][:bases][:debian_7][:create_environment] = {'SUITE' => 'wheezy'}
+default[:vagabond][:bases][:debian_7][:template_options] = {'--release' => 'wheezy'}
 default[:vagabond][:bases][:debian_7][:enabled] = false
+default[:vagabond][:bases][:debian_8][:template] = 'debian'
+default[:vagabond][:bases][:debian_8][:template_options] = {'--release' => 'jessie'}
+default[:vagabond][:bases][:debian_8][:enabled] = false
 default[:vagabond][:customs] = {}
 default[:vagabond][:server][:erchefs] = [] #['11.0.8'] # versions
 default[:vagabond][:server][:base] = 'ubuntu_1204'
