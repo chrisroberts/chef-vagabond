@@ -46,11 +46,11 @@ node[:vagabond][:bases].each do |name, options|
   init_commands = []
   if(!options[:template].scan(%r{debian|ubuntu}).empty?)
     init_commands += [
-      'locale-gen en_US.UTF-8',
-      'update-locale LANG="en_US.UTF-8"',
-      'rm -f /etc/sysctl.d/10-console-messages.conf',
-      'rm -f /etc/sysctl.d/10-ptrace.conf',
-      'rm -f /etc/sysctl.d/10-kernel-hardening.conf'
+      # 'locale-gen en_US.UTF-8',
+      # 'update-locale LANG="en_US.UTF-8"',
+      # 'rm -f /etc/sysctl.d/10-console-messages.conf',
+      # 'rm -f /etc/sysctl.d/10-ptrace.conf',
+      # 'rm -f /etc/sysctl.d/10-kernel-hardening.conf'
     ]
   end
   init_commands += pkg_coms + [
